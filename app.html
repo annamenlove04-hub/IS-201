@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mot-Jeu | French Vocabulary Wordle</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons for UI elements -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <style>
+        :root {
+            --primary-bg: #0b132b;      /* Deep Parisian Midnight */
+            --tile-bg: #1c2541;         /* Dark Slate Blue */
+            --border-color: #3a506b;    /* Light Slate Blue */
+            --accent-gold: #c5a059;     /* Parisian Gold */
+            --accent-cream: #faf5f0;    /* Text Light */
+            --color-correct: #538d4e;   /* Green */
+            --color-present: #b59f3b;   /* Yellow */
+            --color-absent: #3a3a3c;    /* Gray */
+            --modal-overlay: rgba(11, 19, 43, 0.85);
+        }
+        body {
+            background-color: var(--primary-bg);
+            color: var(--accent-cream);
+            font-family: 'Quicksand', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        /* Header Bar */
+        header {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 2px solid var(--border-color);
+            box-sizing: border-box;
+        }
+        .btn-back {
+            color: var(--accent-cream);
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.3s;
+        }
+        .btn-back:hover {
+            color: var(--accent-gold);
+        }
+        .logo-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--accent-gold);
+            margin: 0;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(197, 160, 89, 0.3);
+        }
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--accent-cream);
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: color 0.3s, transform 0.2s;
+            padding: 0;
+        }
+        .icon-btn:hover {
+            color: var(--accent-gold);
+            transform: scale(1.1);
+        }
+        /* Main Game Area */
+        .game-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+            max-width: 500px;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        /* Hints and Stats Bar */
+        .hint-bar {
+            text-align: center;
+            min-height: 40px;
+            width: 100%;
+        }
+        .btn-clue {
+            background-color: transparent;
+            border: 1px solid var(--accent-gold);
+            color: var(--accent-gold);
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-clue:hover {
+            background-color: var(--accent-gold);
+            color: var(--primary-bg);
+            box-shadow: 0 0 10px rgba(197, 160, 89, 0.4);
+        }
+        .clue-box {
+            background-color: var(--tile-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-top: 8px;
+            font-size: 0.95rem;
+            animation: fadeIn 0.4s ease;
+            display: none;
+        }
+        /* Wordle Grid */
+        .grid {
+            display: grid;
+            grid-template-rows: repeat(6, 1fr);
+            gap: 6px;
+            width: 100%;
+            max-width: 320px;
+            aspect-ratio: 5 / 6;
+        }
+        .row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+        }
+        .tile {
+            width: 100%;
+            aspect-ratio: 1;
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            user-select: none;
+            background-color: var(--tile-bg);
+            box-sizing: border-box;
+            transition: transform 0.1s;
+        }
+        /* Pop animation when character typed */
+        .tile.pop {
+            transform: scale(1.15);
+            border-color: var(--accent-cream);
+        }
+        /* Flip animation when row evaluated */
+        .tile.flip {
+            animation: flipTile 0.5s ease forwards;
+        }
+        /* Shake animation when error occurs */
+        .row.shake {
+            animation: shakeRow 0.5s ease;
+        }
+        /* Bounce animation when won */
+        .tile.bounce {
+            animation: bounceTile 0.5s ease;
+        }
+        /* Tile Evaluated States */
+        .tile.correct {
+            background-color: var(--color-correct) !important;
+            border-color: var(--color-correct) !important;
+            color: white;
+        }
+        .tile.present {
+            background-color: var(--color-present) !important;
+            border-color: var(--color-present) !important;
+            color: white;
+        }
+        .tile.absent {
+            background-color: var(--color-absent) !important;
+            border-color: var(--color-absent) !important;
+            color: #888;
+        }
+        /* Virtual Keyboard */
+        .keyboard {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .kbd-row {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+        }
+        .kbd-key {
+            background-color: var(--border-color);
+            color: var(--accent-cream);
+            border: none;
+            border-radius: 4px;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            height: 48px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        .kbd-key:hover {
+            background-color: #4f6d7a;
+        }
+        .kbd-key:active {
+            transform: scale(0.95);
+        }
+        .kbd-key.wide {
+            flex: 1.5;
+            font-size: 0.9rem;
+        }
+        /* Keyboard Evaluated States */
+        .kbd-key.correct {
+            background-color: var(--color-correct) !important;
+            color: white;
+        }
+        .kbd-key.present {
+            background-color: var(--color-present) !important;
+            color: white;
+        }
+        .kbd-key.absent {
+            background-color: var(--color-absent) !important;
+            opacity: 0.4;
+        }
+        /* Modal Panels */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--modal-overlay);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background-color: var(--tile-bg);
+            border: 2px solid var(--accent-gold);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            padding: 30px;
+            box-sizing: border-box;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            text-align: center;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+        .modal-content h3 {
+            font-family: 'Playfair Display', serif;
+            color: var(--accent-gold);
+            margin-top: 0;
+            font-size: 1.8rem;
+        }
+        .modal-content p {
+            margin-bottom: 20px;
+            font-size: 1.05rem;
+        }
+        .btn-modal {
+            background-color: var(--accent-gold);
+            color: var(--primary-bg);
+            border: none;
+            border-radius: 25px;
+            padding: 10px 25px;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(197, 160, 89, 0.2);
+        }
+        .btn-modal:hover {
+            box-shadow: 0 4px 15px rgba(197, 160, 89, 0.5);
+            transform: scale(1.05);
+        }
+        /* Success & Definition Box styling */
+        .def-box {
+            background-color: rgba(197, 160, 89, 0.1);
+            border: 1px solid var(--accent-gold);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .def-box h4 {
+            color: var(--accent-gold);
+            margin: 0 0 5px 0;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+        }
+        .def-box p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #ccc;
+        }
+        /* Unordered lists in how-to modal */
+        .rules-list {
+            text-align: left;
+            padding-left: 20px;
+            font-size: 0.95rem;
+            margin-bottom: 25px;
+        }
+        .rules-list li {
+            margin-bottom: 8px;
+        }
+        /* Confetti canvas */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes flipTile {
+            0% { transform: rotateX(0deg); background-color: var(--tile-bg); }
+            45% { transform: rotateX(90deg); background-color: var(--tile-bg); }
+            55% { transform: rotateX(90deg); }
+            100% { transform: rotateX(0deg); }
+        }
+        @keyframes shakeRow {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        @keyframes bounceTile {
+            0%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-12px); }
+            60% { transform: translateY(6px); }
+        }
+        /* Responsiveness adjustments */
+        @media (max-height: 700px) {
+            .logo-title { font-size: 1.5rem; }
+            .tile { font-size: 1.5rem; }
+            .kbd-key { height: 40px; font-size: 0.95rem; }
+            .game-area { gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="confetti-canvas"></canvas>
+    <!-- Header navigation -->
+    <header>
+        <a href="./scratch.html" class="btn-back">
+            <i class="bi bi-arrow-left"></i> La Pâtisserie
+        </a>
+        <h1 class="logo-title">MOT-JEU</h1>
+        <div class="header-actions">
+            <button class="icon-btn" id="btn-help" title="How to Play"><i class="bi bi-question-circle-fill"></i></button>
+            <button class="icon-btn" id="btn-reload" title="New Game"><i class="bi bi-arrow-clockwise"></i></button>
+        </div>
+    </header>
+    <!-- Game Content Area -->
+    <div class="game-area">
+        <!-- Hint section -->
+        <div class="hint-bar">
+            <button class="btn-clue" id="btn-get-clue">Get Translation Hint</button>
+            <div class="clue-box" id="clue-display">Click the button above to reveal a hint.</div>
+        </div>
+        <!-- 6x5 Wordle Grid -->
+        <div class="grid" id="board-grid">
+            <!-- Programmatically generated rows -->
+        </div>
+        <!-- Virtual Keyboard -->
+        <div class="keyboard">
+            <div class="kbd-row">
+                <button class="kbd-key" data-key="Q">Q</button>
+                <button class="kbd-key" data-key="W">W</button>
+                <button class="kbd-key" data-key="E">E</button>
+                <button class="kbd-key" data-key="R">R</button>
+                <button class="kbd-key" data-key="T">T</button>
+                <button class="kbd-key" data-key="Y">Y</button>
+                <button class="kbd-key" data-key="U">U</button>
+                <button class="kbd-key" data-key="I">I</button>
+                <button class="kbd-key" data-key="O">O</button>
+                <button class="kbd-key" data-key="P">P</button>
+            </div>
+            <div class="kbd-row">
+                <button class="kbd-key" data-key="A">A</button>
+                <button class="kbd-key" data-key="S">S</button>
+                <button class="kbd-key" data-key="D">D</button>
+                <button class="kbd-key" data-key="F">F</button>
+                <button class="kbd-key" data-key="G">G</button>
+                <button class="kbd-key" data-key="H">H</button>
+                <button class="kbd-key" data-key="J">J</button>
+                <button class="kbd-key" data-key="K">K</button>
+                <button class="kbd-key" data-key="L">L</button>
+            </div>
+            <div class="kbd-row">
+                <button class="kbd-key wide" data-key="ENTER">ENTER</button>
+                <button class="kbd-key" data-key="Z">Z</button>
+                <button class="kbd-key" data-key="X">X</button>
+                <button class="kbd-key" data-key="C">C</button>
+                <button class="kbd-key" data-key="V">V</button>
+                <button class="kbd-key" data-key="B">B</button>
+                <button class="kbd-key" data-key="N">N</button>
+                <button class="kbd-key" data-key="M">M</button>
+                <button class="kbd-key wide" data-key="BACK"><i class="bi bi-backspace"></i></button>
+            </div>
+        </div>
+    </div>
+    <!-- How to Play Modal -->
+    <div class="modal-overlay" id="help-modal">
+        <div class="modal-content">
+            <h3>Comment Jouer?</h3>
+            <p>Guess the <strong>French Vocabulary</strong> word in 6 tries. The words relate to Paris, France, food, or travel.</p>
+            <ul class="rules-list">
+                <li>Each guess must be a valid 5-letter word (accents are ignored, e.g., type E for É).</li>
+                <li>The color of the tiles will change to show how close your guess was to the word:</li>
+                <li><strong style="color: var(--color-correct);">Green:</strong> The letter is in the correct spot.</li>
+                <li><strong style="color: var(--color-present);">Yellow:</strong> The letter is in the word but in the wrong spot.</li>
+                <li><strong style="color: var(--color-absent);">Gray:</strong> The letter is not in the word.</li>
+            </ul>
+            <button class="btn-modal" id="btn-close-help">D'accord! (Start Game)</button>
+        </div>
+    </div>
+    <!-- Game Over Modal -->
+    <div class="modal-overlay" id="game-over-modal">
+        <div class="modal-content">
+            <h3 id="game-status-title">Magnifique!</h3>
+            <p id="game-status-subtitle">You solved the puzzle!</p>
+            
+            <div class="def-box">
+                <h4 id="target-word-display">SEINE</h4>
+                <p id="target-clue-display">The river that flows through the heart of Paris, dividing the Left and Right banks.</p>
+            </div>
+            <button class="btn-modal" id="btn-play-again">Jouer à Nouveau</button>
+        </div>
+    </div>
+    <!-- Game Logic Script -->
+    <script>
+        // Dictionary of 5-letter French words with English translation/clue
+        const WORD_DICTIONARY = [
+            { word: "PARIS", clue: "The capital city of France, known as the 'City of Light'." },
+            { word: "METRO", clue: "The rapid transit system serving Paris, known for its iconic Art Nouveau entrances." },
+            { word: "SEINE", clue: "The historic river that flows through the heart of Paris, dividing the Left and Right banks." },
+            { word: "FLEUR", clue: "French word for 'flower'. Often seen in the beautiful Luxembourg Gardens." },
+            { word: "AMOUR", clue: "French word for 'love'. Paris is famously celebrated as the City of Love." },
+            { word: "CAFES", clue: "Sidewalk establishments where Parisians meet to relax, chat, and watch the city pass by." },
+            { word: "MUSEE", clue: "French word for 'museum', like the world-famous Louvre or Musée d'Orsay." },
+            { word: "OPERA", clue: "A grand performance house, like the historic Palais Garnier in the heart of Paris." },
+            { word: "CREPE", clue: "A very thin pancake, a traditional French delicacy served sweet or savory." },
+            { word: "HOTEL", clue: "French word for 'hotel', as in 'Hôtel de Ville' (City Hall) or luxury accommodations." },
+            { word: "TOURS", clue: "French word for 'towers', like the iconic towers of the Notre-Dame Cathedral." },
+            { word: "PONTS", clue: "French word for 'bridges', such as Pont Neuf or Pont Alexandre III." },
+            { word: "LOIRE", clue: "The longest river in France, famous for its majestic castles and royal valleys." },
+            { word: "CHEFS", clue: "French word for culinary masters or heads of kitchens in gourmet restaurants." },
+            { word: "FRITE", clue: "French word for a fry; Belgian and French cuisines famously serve 'steaks-frites'." },
+            { word: "SOUPE", clue: "French word for 'soup', such as the classic French Onion Soup served with Gruyère." },
+            { word: "VIGNE", clue: "French word for 'vine' or 'vineyard', representing the ancient French wine heritage." },
+            { word: "ROUGE", clue: "French word for 'red', as in the world-famous Moulin Rouge cabaret." },
+            { word: "BLANC", clue: "French word for 'white', as in Mont Blanc, the highest peak in the French Alps." },
+            { word: "BLEUS", clue: "French word for 'blues', and the affectionate nickname of the French national sports teams." },
+            { word: "PLAZA", clue: "French word for a public square or grand open courtyard, often near historic monuments." },
+            { word: "ROYAL", clue: "French word for 'royal', reflecting the heritage of French palaces like Versailles." },
+            { word: "VIEUX", clue: "French word for 'old', denoting historic structures or neighborhoods (e.g. Vieux Paris)." },
+            { word: "PORTE", clue: "French word for 'door' or 'gate', representing historical entrance gates into Paris." },
+            { word: "GARES", clue: "French word for 'railway stations', like Gare du Nord or Gare de Lyon." },
+            { word: "GUIDE", clue: "French word for a handbook or a guide who leads historical walking tours." },
+            { word: "MONDE", clue: "French word for 'world', and the name of France's leading daily newspaper (Le Monde)." },
+            { word: "HEURE", clue: "French word for 'hour' or 'time', essential in expressions of French daily schedules." }
+        ];
+        // Game Configuration
+        const MAX_GUESSES = 6;
+        const WORD_LENGTH = 5;
+        let selectedWordObj = null;
+        let solutionWord = "";
+        let currentGuess = "";
+        let guesses = [];
+        let gameOver = false;
+        // Audio synthesizer Context
+        let audioCtx = null;
+        // Confetti particles array
+        let confettiParticles = [];
+        let animationFrameId = null;
+        // DOM elements
+        const gridElement = document.getElementById("board-grid");
+        const kbdKeys = document.querySelectorAll(".kbd-key");
+        const btnClue = document.getElementById("btn-get-clue");
+        const clueDisplay = document.getElementById("clue-display");
+        const helpModal = document.getElementById("help-modal");
+        const gameOverModal = document.getElementById("game-over-modal");
+        const btnCloseHelp = document.getElementById("btn-close-help");
+        const btnHelp = document.getElementById("btn-help");
+        const btnReload = document.getElementById("btn-reload");
+        const btnPlayAgain = document.getElementById("btn-play-again");
+        const targetWordDisplay = document.getElementById("target-word-display");
+        const targetClueDisplay = document.getElementById("target-clue-display");
+        const gameStatusTitle = document.getElementById("game-status-title");
+        const gameStatusSubtitle = document.getElementById("game-status-subtitle");
+        const canvas = document.getElementById("confetti-canvas");
+        const ctx = canvas.getContext("2d");
+        // Synthesize Sound Effects
+        function playSound(type) {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                if (type === 'type') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(450, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.005, audioCtx.currentTime + 0.05);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.05);
+                } else if (type === 'error') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.2);
+                } else if (type === 'success') {
+                    const chimes = [261.63, 329.63, 392.00, 523.25];
+                    chimes.forEach((freq, idx) => {
+                        const o = audioCtx.createOscillator();
+                        const g = audioCtx.createGain();
+                        o.connect(g);
+                        g.connect(audioCtx.destination);
+                        o.type = 'sine';
+                        o.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.08);
+                        g.gain.setValueAtTime(0.04, audioCtx.currentTime + idx * 0.08);
+                        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.08 + 0.35);
+                        o.start(audioCtx.currentTime + idx * 0.08);
+                        o.stop(audioCtx.currentTime + idx * 0.08 + 0.35);
+                    });
+                } else if (type === 'fail') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(90, audioCtx.currentTime + 0.45);
+                    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.002, audioCtx.currentTime + 0.45);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.45);
+                }
+            } catch (e) {
+                console.log("Audio synthesis failed to initialize.", e);
+            }
+        }
+        // Initialize grid HTML
+        function buildGrid() {
+            gridElement.innerHTML = "";
+            for (let i = 0; i < MAX_GUESSES; i++) {
+                const row = document.createElement("div");
+                row.className = "row";
+                row.id = `row-${i}`;
+                for (let j = 0; j < WORD_LENGTH; j++) {
+                    const tile = document.createElement("div");
+                    tile.className = "tile";
+                    tile.id = `tile-${i}-${j}`;
+                    row.appendChild(tile);
+                }
+                gridElement.appendChild(row);
+            }
+        }
+        // Setup Game
+        function initGame() {
+            // Select random word
+            selectedWordObj = WORD_DICTIONARY[Math.floor(Math.random() * WORD_DICTIONARY.length)];
+            solutionWord = selectedWordObj.word.toUpperCase();
+            currentGuess = "";
+            guesses = [];
+            gameOver = false;
+            clueDisplay.style.display = "none";
+            clueDisplay.innerText = "Click the button above to reveal a hint.";
+            
+            // Clean grid
+            buildGrid();
+            // Reset virtual keyboard colors
+            kbdKeys.forEach(key => {
+                key.className = "kbd-key";
+                if (key.dataset.key === "ENTER" || key.dataset.key === "BACK") {
+                    key.classList.add("wide");
+                }
+            });
+            // Close modals
+            gameOverModal.classList.remove("active");
+            stopConfetti();
+        }
+        // Handle letter insertion
+        function addLetter(letter) {
+            if (gameOver) return;
+            if (currentGuess.length < WORD_LENGTH) {
+                playSound('type');
+                currentGuess += letter.toUpperCase();
+                updateGridVisuals();
+            }
+        }
+        // Handle letter deletion
+        function removeLetter() {
+            if (gameOver) return;
+            if (currentGuess.length > 0) {
+                playSound('type');
+                currentGuess = currentGuess.slice(0, -1);
+                updateGridVisuals();
+            }
+        }
+        // Update the visual contents of the current active row
+        function updateGridVisuals() {
+            const rowIndex = guesses.length;
+            for (let i = 0; i < WORD_LENGTH; i++) {
+                const tile = document.getElementById(`tile-${rowIndex}-${i}`);
+                if (i < currentGuess.length) {
+                    tile.innerText = currentGuess[i];
+                    if (!tile.classList.contains("pop")) {
+                        tile.classList.add("pop");
+                    }
+                } else {
+                    tile.innerText = "";
+                    tile.classList.remove("pop");
+                }
+            }
+        }
+        // Evaluate guess
+        function submitGuess() {
+            if (gameOver) return;
+            
+            const rowIndex = guesses.length;
+            const currentRow = document.getElementById(`row-${rowIndex}`);
+            if (currentGuess.length !== WORD_LENGTH) {
+                // Shake row for feedback
+                playSound('error');
+                currentRow.classList.add("shake");
+                setTimeout(() => {
+                    currentRow.classList.remove("shake");
+                }, 500);
+                return;
+            }
+            // Word is complete, register and check
+            guesses.push(currentGuess);
+            const guessWord = currentGuess;
+            currentGuess = ""; // clear buffer for next guess
+            // Evaluate letter matches
+            const solutionLetters = solutionWord.split("");
+            const guessLetters = guessWord.split("");
+            const matches = Array(WORD_LENGTH).fill("absent"); // defaults
+            // Pass 1: Mark correct ones
+            for (let i = 0; i < WORD_LENGTH; i++) {
+                if (guessLetters[i] === solutionLetters[i]) {
+                    matches[i] = "correct";
+                    solutionLetters[i] = null; // consume
+                    guessLetters[i] = null; // consume
+                }
+            }
+            // Pass 2: Mark present ones (yellow)
+            for (let i = 0; i < WORD_LENGTH; i++) {
+                if (guessLetters[i] === null) continue;
+                const idx = solutionLetters.indexOf(guessLetters[i]);
+                if (idx !== -1) {
+                    matches[i] = "present";
+                    solutionLetters[idx] = null; // consume
+                }
+            }
+            // Animate tile evaluations sequentially
+            for (let i = 0; i < WORD_LENGTH; i++) {
+                const tile = document.getElementById(`tile-${rowIndex}-${i}`);
+                
+                setTimeout(() => {
+                    tile.classList.add("flip");
+                    
+                    // Update colors half-way through the flip
+                    setTimeout(() => {
+                        tile.classList.add(matches[i]);
+                        tile.classList.remove("pop");
+                        
+                        // Update keyboard letters
+                        updateKeyboardKey(guessWord[i], matches[i]);
+                    }, 250);
+                }, i * 150);
+            }
+            // Check final win/loss state after all tile flips complete
+            setTimeout(() => {
+                if (guessWord === solutionWord) {
+                    // Win state
+                    gameOver = true;
+                    playSound('success');
+                    
+                    // Bounce correct row tiles
+                    for (let i = 0; i < WORD_LENGTH; i++) {
+                        const tile = document.getElementById(`tile-${rowIndex}-${i}`);
+                        setTimeout(() => tile.classList.add("bounce"), i * 100);
+                    }
+                    setTimeout(() => {
+                        triggerWinScreen();
+                    }, 1000);
+                } else if (guesses.length === MAX_GUESSES) {
+                    // Loss state
+                    gameOver = true;
+                    playSound('fail');
+                    setTimeout(() => {
+                        triggerLossScreen();
+                    }, 1000);
+                }
+            }, WORD_LENGTH * 150 + 250);
+        }
+        // Update the virtual keyboard key color mapping
+        function updateKeyboardKey(letter, status) {
+            const keyButton = document.querySelector(`.kbd-key[data-key="${letter}"]`);
+            if (!keyButton) return;
+            if (status === "correct") {
+                keyButton.className = "kbd-key correct";
+            } else if (status === "present" && !keyButton.classList.contains("correct")) {
+                keyButton.className = "kbd-key present";
+            } else if (status === "absent" && !keyButton.classList.contains("correct") && !keyButton.classList.contains("present")) {
+                keyButton.className = "kbd-key absent";
+            }
+        }
+        // Set up win results modal
+        function triggerWinScreen() {
+            gameStatusTitle.innerText = "Magnifique! 🥖";
+            gameStatusTitle.style.color = "var(--color-correct)";
+            gameStatusSubtitle.innerText = `You solved it in ${guesses.length} ${guesses.length === 1 ? 'try' : 'tries'}!`;
+            targetWordDisplay.innerText = solutionWord;
+            targetClueDisplay.innerText = selectedWordObj.clue;
+            
+            gameOverModal.classList.add("active");
+            startConfetti();
+        }
+        // Set up loss results modal
+        function triggerLossScreen() {
+            gameStatusTitle.innerText = "Désolé! 🇫🇷";
+            gameStatusTitle.style.color = "var(--color-present)";
+            gameStatusSubtitle.innerText = "Better luck next time. The secret word was:";
+            targetWordDisplay.innerText = solutionWord;
+            targetClueDisplay.innerText = selectedWordObj.clue;
+            
+            gameOverModal.classList.add("active");
+        }
+        // Event listener mapping
+        function handleInput(key) {
+            if (gameOver) return;
+            if (key === "ENTER") {
+                submitGuess();
+            } else if (key === "BACK" || key === "BACKSPACE") {
+                removeLetter();
+            } else if (/^[a-zA-Z]$/.test(key)) {
+                addLetter(key);
+            }
+        }
+        // Screen Resize for Confetti
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        // Confetti effect mechanics
+        function startConfetti() {
+            resizeCanvas();
+            window.addEventListener("resize", resizeCanvas);
+            confettiParticles = [];
+            for (let i = 0; i < 120; i++) {
+                confettiParticles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    r: Math.random() * 6 + 4,
+                    d: Math.random() * canvas.height,
+                    color: `hsl(${Math.random() * 360}, 80%, 60%)`,
+                    tilt: Math.random() * 10 - 5,
+                    tiltAngleIncremental: Math.random() * 0.07 + 0.02,
+                    tiltAngle: 0
+                });
+            }
+            animateConfetti();
+        }
+        function animateConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let finished = true;
+            confettiParticles.forEach((p, idx) => {
+                p.tiltAngle += p.tiltAngleIncremental;
+                p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
+                p.x += Math.sin(p.tiltAngle);
+                p.tilt = Math.sin(p.tiltAngle - idx/3) * 15;
+                if (p.y < canvas.height) {
+                    finished = false;
+                }
+                ctx.beginPath();
+                ctx.lineWidth = p.r;
+                ctx.strokeStyle = p.color;
+                ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+                ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+                ctx.stroke();
+            });
+            // Loop or reset particles
+            confettiParticles.forEach(p => {
+                if (p.y > canvas.height) {
+                    p.x = Math.random() * canvas.width;
+                    p.y = -20;
+                    p.tilt = Math.random() * 10 - 5;
+                }
+            });
+            animationFrameId = requestAnimationFrame(animateConfetti);
+        }
+        function stopConfetti() {
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            window.removeEventListener("resize", resizeCanvas);
+        }
+        // Event Setup
+        window.addEventListener("keydown", (e) => {
+            handleInput(e.key.toUpperCase());
+        });
+        kbdKeys.forEach(key => {
+            key.addEventListener("click", () => {
+                const keyValue = key.dataset.key;
+                handleInput(keyValue);
+            });
+        });
+        btnClue.addEventListener("click", () => {
+            if (gameOver) return;
+            clueDisplay.innerText = `Clue: ${selectedWordObj.clue}`;
+            clueDisplay.style.display = "block";
+            playSound('type');
+        });
+        btnReload.addEventListener("click", () => {
+            if (confirm("Are you sure you want to start a new game?")) {
+                initGame();
+            }
+        });
+        btnPlayAgain.addEventListener("click", initGame);
+        // Help Modal toggle
+        btnHelp.addEventListener("click", () => {
+            helpModal.classList.add("active");
+        });
+        btnCloseHelp.addEventListener("click", () => {
+            helpModal.classList.remove("active");
+            // Warm up audio context
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        });
+        // Auto show instruction modal on first visit
+        window.addEventListener("DOMContentLoaded", () => {
+            buildGrid();
+            initGame();
+            setTimeout(() => {
+                helpModal.classList.add("active");
+            }, 500);
+        });
+    </script>
+</body>
+</html>
