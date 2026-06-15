@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paris, France | The City of Light</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles/styles.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg custom-navbar sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="./index.html">
+                <i class="bi bi-compass-fill me-2"></i>Découvrir Paris
+            </a>
+            <button class="navbar-brand navbar-toggler border-0 text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="./index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="./resume.html">Resume</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="./scratch.html">Scratch Page</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="./app.html">Wordle Game</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <!-- Hero Section -->
+    <header class="hero-section" style="background-image: url('https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=1600&auto=format&fit=crop');">
+        <div class="hero-overlay"></div>
+        <div class="container hero-content">
+            <h1 class="hero-title text-white">Paris, France</h1>
+            <p class="hero-subtitle text-white">The City of Light, Art, and Gastronomy</p>
+            <a href="#discover" class="btn btn-gold text-white px-5 py-3">Explore the Landmarks</a>
+        </div>
+    </header>
+    <!-- Welcome Section -->
+    <section id="discover" class="section-padding container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h2 class="mb-3">A City Steeped in History & Elegance</h2>
+                <p class="lead text-muted">Paris is more than a destination; it's a global center for art, fashion, gastronomy, and culture.</p>
+                <p>Its 19th-century cityscape is crisscrossed by wide boulevards and the River Seine. Beyond such landmarks as the Eiffel Tower and the 12th-century, Gothic Notre-Dame cathedral, the city is known for its cafe culture and designer boutiques along the Rue du Faubourg Saint-Honoré.</p>
+                <p>Whether you're strolling through the historic Marais district, exploring world-renowned museums, or savoring a fresh croissant at a sidewalk bistro, Paris promises an unforgettable journey of discovery.</p>
+            </div>
+            <div class="col-lg-6">
+                <img src="https://images.unsplash.com/photo-1499856871958-5b9627545d1a?q=80&w=1000&auto=format&fit=crop" alt="Parisian Street view with Notre-Dame" class="img-fluid rounded-4 shadow">
+            </div>
+        </div>
+    </section>
+    <!-- Landmarks Section -->
+    <section class="bg-light section-padding">
+        <div class="container">
+            <h2 class="text-center section-title">Must-Visit Landmarks</h2>
+            <div class="row">
+                <!-- Landmark 1 -->
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 paris-card">
+                        <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=600&auto=format&fit=crop" class="card-img-top" alt="Eiffel Tower">
+                        <div class="card-body">
+                            <h5 class="card-title">La Tour Eiffel</h5>
+                            <p class="card-text">Completed in 1889 for the World's Fair, the Eiffel Tower was initially criticized by leading French artists, but has since become a global cultural icon of France and one of the most recognizable structures in the world.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Landmark 2 -->
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 paris-card">
+                        <img src="images/louvre.jpeg" class="card-img-top" alt="Louvre Museum Pyramid">
+                        <div class="card-body">
+                            <h5 class="card-title">Musée du Louvre</h5>
+                            <p class="card-text">The world's largest art museum and a historic monument in Paris. Home to some of the most celebrated works of art, including the Mona Lisa and the Venus de Milo, housed in the grand Louvre Palace.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Landmark 3 -->
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 paris-card">
+                        <img src="images/triomphe.jpeg" class="card-img-top" alt="Arc de Triomphe">
+                        <div class="card-body">
+                            <h5 class="card-title">Arc de Triomphe</h5>
+                            <p class="card-text">Standing at the western end of the Champs-Élysées, this monument honors those who fought and died for France in the French Revolutionary and Napoleonic Wars, offering stunning panoramic views of the city's twelve radiating avenues.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Cultural Highlights (Carousel or Grids) -->
+    <section class="section-padding container">
+        <div class="row align-items-center">
+            <div class="col-lg-5 order-lg-2 mb-4 mb-lg-0">
+                <h2>The Art of Parisian Gastronomy</h2>
+                <p>French gastronomy is so highly regarded that it was added to UNESCO's intangible cultural heritage list. In Paris, food is an art form. From the daily ritual of buying fresh baguettes to dining in world-class Michelin-starred restaurants, culinary experiences are central to the Parisian lifestyle.</p>
+                <div class="mt-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary text-white rounded-circle p-2 d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; background-color: var(--primary-color) !important;">
+                            <i class="bi bi-check-lg"></i>
+                        </div>
+                        <div><strong>Boulangeries & Pâtisseries:</strong> Fresh croissants, pains au chocolat, and macarons.</div>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary text-white rounded-circle p-2 d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; background-color: var(--primary-color) !important;">
+                            <i class="bi bi-check-lg"></i>
+                        </div>
+                        <div><strong>Sidewalk Café Culture:</strong> Relaxed dining and people-watching.</div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary text-white rounded-circle p-2 d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; background-color: var(--primary-color) !important;">
+                            <i class="bi bi-check-lg"></i>
+                        </div>
+                        <div><strong>Fine Dining:</strong> Haute cuisine crafted by world-class chefs.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-7 order-lg-1">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=500&auto=format&fit=crop" class="img-fluid rounded-4 shadow" alt="French Baguettes">
+                    </div>
+                    <div class="col-6">
+                        <img src="https://images.unsplash.com/photo-1511018556340-d16986a1c194?q=80&w=500&auto=format&fit=crop" class="img-fluid rounded-4 shadow" alt="Paris Cafe">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Footer -->
+    <footer class="custom-footer home-footer">
+        <div class="container text-center">
+            <h3 class="footer-logo mb-3"><i class="bi bi-compass-fill me-2"></i>Découvrir Paris</h3>
+            <p class="mb-4">Designed for IS 201 | Explore the beautiful capital of France.</p>
+            <div class="social-icons mb-4">
+                <a href="https://twitter.com/Paris" target="_blank" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
+                <a href="https://www.instagram.com/paris_tourisme/" target="_blank" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                <a href="https://www.facebook.com/ParisJeTaime/" target="_blank" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                <a href="https://www.linkedin.com/company/paris-je-t-aime-office-de-tourisme/" target="_blank" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+            </div>
+            <hr class="border-secondary my-4">
+            <p class="small text-muted mb-0">&copy; 2026 Anna Menlove. All rights reserved. Created for educational purposes. | <a href="./scratch.html" class="text-secondary text-decoration-none">Scratch Page</a> | <a href="./app.html" class="text-secondary text-decoration-none">Wordle Game</a></p>
+        </div>
+    </footer>
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>
